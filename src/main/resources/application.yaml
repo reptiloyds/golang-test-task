@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: testwork
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/postgres}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+errorhandler:
+  retry-after: 5
+server:
+  port: 8080

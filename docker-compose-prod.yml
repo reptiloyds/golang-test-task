@@ -1,0 +1,37 @@
+services:
+  testwork-postgres:
+    image: postgres:17
+    container_name: testwork-postgres
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - ./infrastructure/databases/testwork:/docker-entrypoint-initdb.d:ro
+      - testwork_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -p 5432"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  testwork-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: testwork-app
+    depends_on:
+      testwork-postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://testwork-postgres:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:8080"
+    restart: on-failure
+
+volumes:
+  testwork_data:
